@@ -1,0 +1,1564 @@
+From patchwork Mon May  6 17:03:18 2024
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+X-Patchwork-Submitter: Christian Bartnik <chris10317h5@gmail.com>
+X-Patchwork-Id: 48593
+Delivered-To: ffmpegpatchwork2@gmail.com
+Received: by 2002:a05:6a20:e68f:b0:1af:836d:81b3 with SMTP id
+ mz15csp1504767pzb;
+        Mon, 6 May 2024 10:05:24 -0700 (PDT)
+X-Forwarded-Encrypted: i=2;
+ AJvYcCUPqPuHnDDGf6QeSys68yfJOPDOBPP5+YmFHRomZudMsAiWzKSquPzPudxQxPZTA1p7vJxPgdnrG/EE0IRzOKt8gaaI+VlKAnGb+g==
+X-Google-Smtp-Source: 
+ AGHT+IGaxcxuZp5jnebBmAjmGxDdmCJRrZ+FeyupH4X+v2urjGQxKfRLY2lPac6ci2GlwLjELV7d
+X-Received: by 2002:a50:930a:0:b0:566:4aa9:7143 with SMTP id
+ m10-20020a50930a000000b005664aa97143mr6850543eda.14.1715015123811;
+        Mon, 06 May 2024 10:05:23 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1715015123; cv=none;
+        d=google.com; s=arc-20160816;
+        b=dOaoa4kqH0SlK9nzRnk6+3vhqsyaH/e36P8D9UoJal8YZk+BOyiewwWOi4ZSNVcz52
+         JHPqXAGZwZMk049byVV1INOE4DMLIKw3ZF5b2qpF1hlL8xofMMd7WxcuQKsytgCeVtCe
+         iyNMar7prOh4OExmTCgSfb63t03DLgx0KTeh7Gb9MmJczzRgkLGDpghmsKwNPsFPvSvb
+         ognFcm/BSocjuj5Dh8/7sKeS4TzeIPAw3HvbIcdwlq4m/M56ZitKhsdpeJ4suvb8tPHP
+         JktidFij4VNFYQyhjM7XqcfmkCZbmLXsdxt4cqNB8Ii830wToXAko5iuLItoAvutsYu5
+         jIkw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com;
+ s=arc-20160816;
+        h=sender:errors-to:content-transfer-encoding:reply-to:list-subscribe
+         :list-help:list-post:list-archive:list-unsubscribe:list-id
+         :precedence:subject:mime-version:references:in-reply-to:message-id
+         :date:to:from:dkim-signature:delivered-to;
+        bh=To9z+/Am/sS3VJUpGygtg8bmPjPlemzEueCGRwLUK2E=;
+        fh=YOA8vD9MJZuwZ71F/05pj6KdCjf6jQRmzLS+CATXUQk=;
+        b=LH1RrSW5k/w5+7MZ/797nhJiWN66qWASLENV/sZL4uyVZkqhS4LtWGfQaUwEgCQUy2
+         /ZHfrolQWkQzUKzyuAgiwFb85DxnQamT2YZs3RGg3AqGI4ZiKSwmaZSeu+xHUdGl7pzr
+         4+q/LrH4XAvioULMIP5wNnqCMXr4ZebX6gRsuQu+Z3vzrbWZ7i0GuH9/QhxVUJExGV6U
+         TJgEc3w5DLWCqYZaNBp18GjZBz0qsAq+LWP+GcM7y+tL0QHW5bRl8QVkANy/vsP9D0Ax
+         c/vrcdXAp+2Vl34Y+2wakGbqqMEsesYgpjUOOsrY2HQGXeYPdy5IcUNBVNx/0kxHuFpc
+         P6LQ==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=neutral (body hash did not verify) header.i=@gmail.com
+ header.s=20230601 header.b=XFALGnxB;
+       spf=pass (google.com: domain of ffmpeg-devel-bounces@ffmpeg.org
+ designates 79.124.17.100 as permitted sender)
+ smtp.mailfrom=ffmpeg-devel-bounces@ffmpeg.org;
+       dmarc=fail (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com
+Return-Path: <ffmpeg-devel-bounces@ffmpeg.org>
+Received: from ffbox0-bg.mplayerhq.hu (ffbox0-bg.ffmpeg.org. [79.124.17.100])
+        by mx.google.com with ESMTP id
+ de2-20020a056402308200b005723f52baadsi4862829edb.527.2024.05.06.10.05.15;
+        Mon, 06 May 2024 10:05:23 -0700 (PDT)
+Received-SPF: pass (google.com: domain of ffmpeg-devel-bounces@ffmpeg.org
+ designates 79.124.17.100 as permitted sender) client-ip=79.124.17.100;
+Authentication-Results: mx.google.com;
+       dkim=neutral (body hash did not verify) header.i=@gmail.com
+ header.s=20230601 header.b=XFALGnxB;
+       spf=pass (google.com: domain of ffmpeg-devel-bounces@ffmpeg.org
+ designates 79.124.17.100 as permitted sender)
+ smtp.mailfrom=ffmpeg-devel-bounces@ffmpeg.org;
+       dmarc=fail (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com
+Received: from [127.0.1.1] (localhost [127.0.0.1])
+	by ffbox0-bg.mplayerhq.hu (Postfix) with ESMTP id 2A14C68D54A;
+	Mon,  6 May 2024 20:05:10 +0300 (EEST)
+X-Original-To: ffmpeg-devel@ffmpeg.org
+Delivered-To: ffmpeg-devel@ffmpeg.org
+Received: from mail-pj1-f65.google.com (unknown [209.85.216.65])
+ by ffbox0-bg.mplayerhq.hu (Postfix) with ESMTPS id 7BF6068D67C
+ for <ffmpeg-devel@ffmpeg.org>; Mon,  6 May 2024 20:04:42 +0300 (EEST)
+Received: by mail-pj1-f65.google.com with SMTP id
+ 98e67ed59e1d1-2b38f2e95aeso3090112a91.0
+ for <ffmpeg-devel@ffmpeg.org>; Mon, 06 May 2024 10:04:42 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=gmail.com; s=20230601; t=1715015028; x=1715619828; darn=ffmpeg.org;
+ h=content-transfer-encoding:mime-version:references:in-reply-to
+ :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
+ :reply-to; bh=dC8YrIZK9bHqx8znRGXQIs0bA9tawQAAUsTlkOZR9GM=;
+ b=XFALGnxBR8RDt0WhuMfMfdxOx3CGyuFNTVR9sjJ+sH1ZqcFzw7Ep11ZJIn/lZzQmvK
+ SSGd7+dpxwEw6XZrwCcSaPwO5+datVtTzlt8WKlJLrzpZQIqJF9rsBG7K9z3kv8J0TYT
+ +tnposWSuXE0jlb0YabiHOp/I6+aANgRovavwEKH1XY4Kg5fE6V9tAlq8j8oUo0SbYfA
+ Re//NspvLNCrKzv1TYWEtWuGxvgDIt6bK2NLoFBH7GvgK7gdZInenBtSrVr2LEmOuP9K
+ w3b3AdELoGHcKn1P786FSPdcuuaGMSqVwzobS9NyGpCjV7FbFlnFAqK4ILce2jjxiPqb
+ 2NUw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20230601; t=1715015028; x=1715619828;
+ h=content-transfer-encoding:mime-version:references:in-reply-to
+ :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
+ :subject:date:message-id:reply-to;
+ bh=dC8YrIZK9bHqx8znRGXQIs0bA9tawQAAUsTlkOZR9GM=;
+ b=ky2e8/TNrfGUch8cevqOQR8M6Q2OZGbKtzUnDwXCeZ5VfADI0LYlb/ICQ8p9m+9kDK
+ +41uy845ftUkKLhHh2rO0fMFZAuNut0C9zcbnskzBREC3CW6F5e5gC5n2pkjIgV3SN3x
+ QZefmGYy9QHv69t0mPHAGVCt7yFIzgCcWdY+zokZmCr7dsAKUkXR9VcNceZp9KI5OUiP
+ 3Xc/ydrkvZ3Yr5XQiG/Qi2DBJN1ucqrUBEtVT9kZD8pLco6pLgE5dKwJJow1Ekcb7PgV
+ lnjzmLHpHyCrvd7iQAEb0CUHMTxhVtsy1bbE88b2YNrcplQkDR+GTzSKQFm7sXM1NHje
+ oh6w==
+X-Gm-Message-State: AOJu0YxspNmvpl8yOjn5VO4uJm184V/rFCCDTOJ7kSBCPHx8/S2t8z1L
+ Gk//zU+NAxxpQDl/pbL+7Kzn6M5vG4IBXYnUmFJ5k7/4qaWcfZBbeuoDm848
+X-Received: by 2002:a17:90a:39ce:b0:2aa:c389:c9f0 with SMTP id
+ 98e67ed59e1d1-2b5bbe498bemr368063a91.12.1715015027885;
+ Mon, 06 May 2024 10:03:47 -0700 (PDT)
+Received: from localhost.localdomain
+ ([2804:d55:9507:1500:9008:575f:9f19:a5ca])
+ by smtp.gmail.com with ESMTPSA id
+ w3-20020a17090a528300b002b4329ec537sm6755527pjh.53.2024.05.06.10.03.46
+ for <ffmpeg-devel@ffmpeg.org>
+ (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+ Mon, 06 May 2024 10:03:47 -0700 (PDT)
+From: Christian Bartnik <chris10317h5@gmail.com>
+To: ffmpeg-devel@ffmpeg.org
+Date: Mon,  6 May 2024 19:03:18 +0200
+Message-Id: <20240506170319.43685-2-chris10317h5@gmail.com>
+X-Mailer: git-send-email 2.39.3 (Apple Git-146)
+In-Reply-To: <20240506170319.43685-1-chris10317h5@gmail.com>
+References: <20240506170319.43685-1-chris10317h5@gmail.com>
+MIME-Version: 1.0
+X-Unsent: 1
+Subject: [FFmpeg-devel] [PATCH v2 1/2] avcodec: add external enc libvvenc
+ for H266/VVC
+X-BeenThere: ffmpeg-devel@ffmpeg.org
+X-Mailman-Version: 2.1.29
+Precedence: list
+List-Id: FFmpeg development discussions and patches <ffmpeg-devel.ffmpeg.org>
+List-Unsubscribe: <https://ffmpeg.org/mailman/options/ffmpeg-devel>,
+ <mailto:ffmpeg-devel-request@ffmpeg.org?subject=unsubscribe>
+List-Archive: <https://ffmpeg.org/pipermail/ffmpeg-devel>
+List-Post: <mailto:ffmpeg-devel@ffmpeg.org>
+List-Help: <mailto:ffmpeg-devel-request@ffmpeg.org?subject=help>
+List-Subscribe: <https://ffmpeg.org/mailman/listinfo/ffmpeg-devel>,
+ <mailto:ffmpeg-devel-request@ffmpeg.org?subject=subscribe>
+Reply-To: FFmpeg development discussions and patches <ffmpeg-devel@ffmpeg.org>
+Errors-To: ffmpeg-devel-bounces@ffmpeg.org
+Sender: "ffmpeg-devel" <ffmpeg-devel-bounces@ffmpeg.org>
+X-TUID: TH9DsHfyzqvx
+
+From: Thomas Siedel <thomas.ff@spin-digital.com>
+
+Add external encoder VVenC for H266/VVC encoding.
+Register new encoder libvvenc.
+Add libvvenc to wrap the vvenc interface.
+libvvenc implements encoder option: preset,qp,period,subjopt,
+vvenc-params,levelidc,tier.
+Enable encoder by adding --enable-libvvenc in configure step.
+
+Co-authored-by: Christian Bartnik chris10317h5@gmail.com
+Signed-off-by: Christian Bartnik <chris10317h5@gmail.com>
+---
+ configure              |   4 +
+ libavcodec/Makefile    |   1 +
+ libavcodec/allcodecs.c |   1 +
+ libavcodec/libvvenc.c  | 501 +++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 507 insertions(+)
+ create mode 100644 libavcodec/libvvenc.c
+
+--
+2.34.1
+
+diff --git a/configure b/configure
+index ed74583a6f..cb312d9c73 100755
+--- a/configure
++++ b/configure
+@@ -293,6 +293,7 @@ External library support:
+   --enable-libvorbis       enable Vorbis en/decoding via libvorbis,
+                            native implementation exists [no]
+   --enable-libvpx          enable VP8 and VP9 de/encoding via libvpx [no]
++  --enable-libvvenc        enable H.266/VVC encoding via vvenc [no]
+   --enable-libwebp         enable WebP encoding via libwebp [no]
+   --enable-libx264         enable H.264 encoding via x264 [no]
+   --enable-libx265         enable HEVC encoding via x265 [no]
+@@ -1966,6 +1967,7 @@ EXTERNAL_LIBRARY_LIST="
+     libvmaf
+     libvorbis
+     libvpx
++    libvvenc
+     libwebp
+     libxevd
+     libxeve
+@@ -3548,6 +3550,7 @@ libvpx_vp8_decoder_deps="libvpx"
+ libvpx_vp8_encoder_deps="libvpx"
+ libvpx_vp9_decoder_deps="libvpx"
+ libvpx_vp9_encoder_deps="libvpx"
++libvvenc_encoder_deps="libvvenc"
+ libwebp_encoder_deps="libwebp"
+ libwebp_anim_encoder_deps="libwebp"
+ libx262_encoder_deps="libx262"
+@@ -7010,6 +7013,7 @@ enabled libvpx            && {
+         die "libvpx enabled but no supported decoders found"
+     fi
+ }
++enabled libvvenc          && require_pkg_config libvvenc "libvvenc >= 1.6.1" "vvenc/vvenc.h" vvenc_get_version
+
+ enabled libwebp           && {
+     enabled libwebp_encoder      && require_pkg_config libwebp "libwebp >= 0.2.0" webp/encode.h WebPGetEncoderVersion
+diff --git a/libavcodec/Makefile b/libavcodec/Makefile
+index cff6347bdb..54d85f6aaa 100644
+--- a/libavcodec/Makefile
++++ b/libavcodec/Makefile
+@@ -1155,6 +1155,7 @@ OBJS-$(CONFIG_LIBVPX_VP8_DECODER)         += libvpxdec.o
+ OBJS-$(CONFIG_LIBVPX_VP8_ENCODER)         += libvpxenc.o
+ OBJS-$(CONFIG_LIBVPX_VP9_DECODER)         += libvpxdec.o
+ OBJS-$(CONFIG_LIBVPX_VP9_ENCODER)         += libvpxenc.o
++OBJS-$(CONFIG_LIBVVENC_ENCODER)           += libvvenc.o
+ OBJS-$(CONFIG_LIBWEBP_ENCODER)            += libwebpenc_common.o libwebpenc.o
+ OBJS-$(CONFIG_LIBWEBP_ANIM_ENCODER)       += libwebpenc_common.o libwebpenc_animencoder.o
+ OBJS-$(CONFIG_LIBX262_ENCODER)            += libx264.o
+diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
+index f4705651fb..bb2c3ce017 100644
+--- a/libavcodec/allcodecs.c
++++ b/libavcodec/allcodecs.c
+@@ -801,6 +801,7 @@ extern const FFCodec ff_libvpx_vp8_encoder;
+ extern const FFCodec ff_libvpx_vp8_decoder;
+ extern FFCodec ff_libvpx_vp9_encoder;
+ extern const FFCodec ff_libvpx_vp9_decoder;
++extern const FFCodec ff_libvvenc_encoder;
+ /* preferred over libwebp */
+ extern const FFCodec ff_libwebp_anim_encoder;
+ extern const FFCodec ff_libwebp_encoder;
+diff --git a/libavcodec/libvvenc.c b/libavcodec/libvvenc.c
+new file mode 100644
+index 0000000000..c459273f44
+--- /dev/null
++++ b/libavcodec/libvvenc.c
+@@ -0,0 +1,501 @@
++/*
++ * H.266 encoding using the VVenC library
++ *
++ * Copyright (C) 2022, Thomas Siedel
++ *
++ * This file is part of FFmpeg.
++ *
++ * FFmpeg is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * FFmpeg is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with FFmpeg; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
++ */
++
++#include "config_components.h"
++
++#include <vvenc/vvenc.h>
++#include <vvenc/vvencCfg.h>
++#include <vvenc/version.h>
++
++#include "avcodec.h"
++#include "codec_internal.h"
++#include "encode.h"
++#include "internal.h"
++#include "packet_internal.h"
++#include "profiles.h"
++
++#include "libavutil/avutil.h"
++#include "libavutil/mem.h"
++#include "libavutil/pixdesc.h"
++#include "libavutil/opt.h"
++#include "libavutil/common.h"
++#include "libavutil/imgutils.h"
++#include "libavutil/frame.h"
++#include "libavutil/log.h"
++
++typedef struct VVenCOptions {
++    int preset;                 // preset 0: faster  4: slower
++    int qp;                     // quantization parameter 0-63
++    int subjectiveOptimization; // perceptually motivated QP adaptation, XPSNR based
++    int flag8bitCoding;         // encode in 8bit instead of 10bit
++    int intraRefreshSec;        // intra period/refresh in seconds
++    int levelIdc;               // vvc level_idc
++    int tier;                   // vvc tier
++    AVDictionary *vvenc_opts;
++} VVenCOptions;
++
++typedef struct VVenCContext {
++    AVClass         *av_class;
++    VVenCOptions    options;      // encoder options
++    vvencEncoder    *vvencEnc;
++    vvencAccessUnit *pAU;
++    bool            encodeDone;
++} VVenCContext;
++
++
++static av_cold void ff_vvenc_log_callback(void *avctx, int level,
++                                          const char *fmt, va_list args)
++{
++    vfprintf(level == 1 ? stderr : stdout, fmt, args);
++}
++
++static void ff_vvenc_internalLog(void *ctx, int level, const char *fmt, ...)
++{
++    va_list args;
++    va_start(args, fmt);
++    ff_vvenc_log_callback(ctx, level, fmt, args);
++    va_end(args);
++}
++
++static av_cold int ff_vvenc_encode_init(AVCodecContext *avctx)
++{
++    int ret;
++    int framerate, qp, parse_ret;
++    VVenCContext *s;
++    vvenc_config params;
++    vvencPresetMode preset;
++    AVDictionaryEntry *en;
++    char statsfile[1024] = "vvenc-rcstats.json";
++
++    s = (VVenCContext *) avctx->priv_data;
++    qp = (vvencPresetMode) s->options.qp;
++    preset = (vvencPresetMode) s->options.preset;
++
++    if (avctx->flags & AV_CODEC_FLAG_INTERLACED_DCT) {
++        av_log(avctx, AV_LOG_ERROR,
++               "ff_vvenc_encode_init::init() interlaced encoding not supported yet\n");
++        return AVERROR_INVALIDDATA;
++    }
++
++    vvenc_config_default(&params);
++
++    // set desired encoding options
++    framerate = avctx->time_base.den / avctx->time_base.num;
++    vvenc_init_default(&params, avctx->width, avctx->height, framerate,
++                       (qp >= 0) ? 0 : avctx->bit_rate, (qp < 0) ? 32 : qp, preset);
++    params.m_FrameRate = avctx->time_base.den;
++    params.m_FrameScale = avctx->time_base.num;
++
++    params.m_verbosity = VVENC_VERBOSE;
++    if (av_log_get_level() >= AV_LOG_DEBUG)
++        params.m_verbosity = VVENC_DETAILS;
++    else if (av_log_get_level() >= AV_LOG_VERBOSE)
++        params.m_verbosity = VVENC_NOTICE;      // output per picture info
++    else if (av_log_get_level() >= AV_LOG_INFO)
++        params.m_verbosity = VVENC_WARNING;     // ffmpeg default ffmpeg loglevel
++    else
++        params.m_verbosity = VVENC_SILENT;
++
++FF_DISABLE_DEPRECATION_WARNINGS
++
++#if FF_API_TICKS_PER_FRAME
++    if (avctx->ticks_per_frame == 1) {
++#endif
++        params.m_TicksPerSecond = -1;   // auto mode for ticks per frame = 1
++#if FF_API_TICKS_PER_FRAME
++    } else {
++        params.m_TicksPerSecond =
++            ceil((avctx->time_base.den / (double) avctx->time_base.num) *
++                 (double) avctx->ticks_per_frame);
++    }
++#endif
++FF_ENABLE_DEPRECATION_WARNINGS
++
++    if (avctx->thread_count > 0)
++        params.m_numThreads = avctx->thread_count;
++
++    // GOP settings (IDR/CRA)
++    if (avctx->flags & AV_CODEC_FLAG_CLOSED_GOP)
++        params.m_DecodingRefreshType = VVENC_DRT_IDR;
++
++    if (avctx->gop_size == 1) {
++        params.m_GOPSize = 1;
++        params.m_IntraPeriod = 1;
++    } else {
++        params.m_IntraPeriodSec = s->options.intraRefreshSec;
++    }
++
++    params.m_usePerceptQPA = s->options.subjectiveOptimization;
++    params.m_level         = (vvencLevel) s->options.levelIdc;
++    params.m_levelTier     = (vvencTier) s->options.tier;
++
++    params.m_AccessUnitDelimiter = true;
++
++    params.m_internChromaFormat = VVENC_CHROMA_420;
++    params.m_inputBitDepth[0]   = 10;
++
++    if ( avctx->pix_fmt != AV_PIX_FMT_YUV420P10LE ){
++        av_log(avctx, AV_LOG_ERROR,
++               "unsupported pixel format %s, currently only support for yuv420p10le\n",
++                av_get_pix_fmt_name(avctx->pix_fmt));
++        return AVERROR(EINVAL);
++    }
++
++    if ( s->options.flag8bitCoding ) {
++#if VVENC_VERSION_MAJOR > 1 || (VVENC_VERSION_MAJOR == 1 && VVENC_VERSION_MINOR > 9) || (VVENC_VERSION_MAJOR == 1 && VVENC_VERSION_MINOR >= 9 && VVENC_VERSION_PATCH >= 1)
++        params.m_internalBitDepth[0] = 8;
++#else
++        av_log(avctx, AV_LOG_ERROR,
++                "unsupported 8bit coding mode. 8bit coding needs at least vvenc version >= 1.9.1\n",
++                av_get_pix_fmt_name(avctx->pix_fmt));
++        return AVERROR(EINVAL);
++#endif
++    }
++
++    if (avctx->color_primaries != AVCOL_PRI_UNSPECIFIED)
++        params.m_colourPrimaries = (int) avctx->color_primaries;
++    if (avctx->colorspace != AVCOL_SPC_UNSPECIFIED)
++        params.m_matrixCoefficients = (int) avctx->colorspace;
++    if (avctx->color_trc != AVCOL_TRC_UNSPECIFIED) {
++        params.m_transferCharacteristics = (int) avctx->color_trc;
++
++        if (avctx->color_trc == AVCOL_TRC_SMPTE2084)
++            params.m_HdrMode = (avctx->color_primaries == AVCOL_PRI_BT2020) ?
++                VVENC_HDR_PQ_BT2020 : VVENC_HDR_PQ;
++        else if (avctx->color_trc == AVCOL_TRC_BT2020_10
++                 || avctx->color_trc == AVCOL_TRC_ARIB_STD_B67)
++            params.m_HdrMode = (avctx->color_trc == AVCOL_TRC_BT2020_10 ||
++                                avctx->color_primaries == AVCOL_PRI_BT2020 ||
++                                avctx->colorspace == AVCOL_SPC_BT2020_NCL ||
++                                avctx->colorspace == AVCOL_SPC_BT2020_CL) ?
++                               VVENC_HDR_HLG_BT2020 : VVENC_HDR_HLG;
++    }
++
++    if (params.m_HdrMode == VVENC_HDR_OFF
++        && (avctx->color_primaries != AVCOL_PRI_UNSPECIFIED
++            || avctx->colorspace != AVCOL_SPC_UNSPECIFIED)) {
++        params.m_vuiParametersPresent = 1;
++        params.m_colourDescriptionPresent = true;
++    }
++
++    params.m_RCNumPasses = 1;
++    en = NULL;
++    while ((en = av_dict_get(s->options.vvenc_opts, "", en,
++                             AV_DICT_IGNORE_SUFFIX))) {
++        av_log(avctx, AV_LOG_DEBUG, "vvenc_set_param: '%s:%s'\n", en->key,
++               en->value);
++        parse_ret = vvenc_set_param(&params, en->key, en->value);
++        switch (parse_ret) {
++        case VVENC_PARAM_BAD_NAME:
++            av_log(avctx, AV_LOG_WARNING, "Unknown vvenc option: %s.\n",
++                   en->key);
++            break;
++        case VVENC_PARAM_BAD_VALUE:
++            av_log(avctx, AV_LOG_WARNING,
++                   "Invalid vvenc value for %s: %s.\n", en->key, en->value);
++            break;
++        default:
++            break;
++        }
++
++        if (memcmp(en->key, "rcstatsfile", 11) == 0 ||
++            memcmp(en->key, "RCStatsFile", 11) == 0) {
++            strncpy(statsfile, en->value, sizeof(statsfile) - 1);
++            statsfile[sizeof(statsfile) - 1] = '\0';
++        }
++    }
++
++    if (params.m_RCPass != -1 && params.m_RCNumPasses == 1)
++        params.m_RCNumPasses = 2;       // enable 2pass mode
++
++#if VVENC_VERSION_MAJOR > 1 || (VVENC_VERSION_MAJOR == 1 && VVENC_VERSION_MINOR > 8)
++    if(avctx->rc_max_rate) {
++        if(!avctx->bit_rate) {
++            av_log( avctx, AV_LOG_ERROR, "Rate control parameters set without a bitrate\n");
++            return AVERROR(EINVAL);
++        }
++        else
++            params.m_RCMaxBitrate = avctx->rc_max_rate;
++    }
++#endif
++
++    s->vvencEnc = vvenc_encoder_create();
++    if (NULL == s->vvencEnc) {
++        av_log(avctx, AV_LOG_ERROR, "cannot create vvc encoder (vvenc)\n");
++        return AVERROR(ENOMEM);
++    }
++
++    vvenc_set_msg_callback(&params, s->vvencEnc, ff_vvenc_log_callback);
++    ret = vvenc_encoder_open(s->vvencEnc, &params);
++    if (0 != ret) {
++        av_log(avctx, AV_LOG_ERROR, "cannot open vvc encoder (vvenc): %s\n",
++               vvenc_get_last_error(s->vvencEnc));
++        vvenc_encoder_close(s->vvencEnc);
++        return AVERROR(EINVAL);
++    }
++
++    vvenc_get_config(s->vvencEnc, &params);     // get the adapted config
++
++    if (params.m_verbosity >= VVENC_INFO
++        && av_log_get_level() <= AV_LOG_INFO) {
++        ff_vvenc_internalLog(avctx, params.m_verbosity, "vvenc version: %s\n",
++                             vvenc_get_version());
++        ff_vvenc_internalLog(avctx, params.m_verbosity, "%s\n",
++                             vvenc_get_config_as_string(&params,
++                                                        params.m_verbosity));
++    } else {
++        vvencMsgLevel loglvl = VVENC_INFO;
++        if (av_log_get_level() >= AV_LOG_DEBUG)
++            loglvl = VVENC_DETAILS;
++        else if (av_log_get_level() >= AV_LOG_VERBOSE)
++            loglvl = VVENC_VERBOSE;
++
++        av_log(avctx, av_log_get_level(), "vvenc version: %s\n",
++              vvenc_get_version());
++        av_log(avctx, av_log_get_level(), "%s\n",
++              vvenc_get_config_as_string(&params, loglvl ));
++    }
++
++    if (params.m_RCNumPasses == 2) {
++        ret = vvenc_init_pass(s->vvencEnc, params.m_RCPass - 1, &statsfile[0]);
++        if (0 != ret) {
++            av_log(avctx, AV_LOG_ERROR,
++                   "cannot init pass %d for vvc encoder (vvenc): %s\n",
++                   params.m_RCPass, vvenc_get_last_error(s->vvencEnc));
++            vvenc_encoder_close(s->vvencEnc);
++            return AVERROR(EINVAL);
++        }
++    }
++
++    s->pAU = vvenc_accessUnit_alloc();
++    vvenc_accessUnit_alloc_payload(s->pAU, avctx->width * avctx->height);
++
++    if (avctx->flags & AV_CODEC_FLAG_GLOBAL_HEADER) {
++        ret = vvenc_get_headers(s->vvencEnc, s->pAU);
++        if (0 != ret) {
++            av_log(avctx, AV_LOG_ERROR,
++                   "cannot get headers (SPS,PPS) from vvc encoder(vvenc): %s\n",
++                   vvenc_get_last_error(s->vvencEnc));
++            vvenc_encoder_close(s->vvencEnc);
++            return AVERROR(EINVAL);
++        }
++
++        if (s->pAU->payloadUsedSize <= 0) {
++            vvenc_encoder_close(s->vvencEnc);
++            return AVERROR_INVALIDDATA;
++        }
++
++        avctx->extradata_size = s->pAU->payloadUsedSize;
++        avctx->extradata =
++            av_mallocz(avctx->extradata_size + AV_INPUT_BUFFER_PADDING_SIZE);
++        if (!avctx->extradata) {
++            av_log(avctx, AV_LOG_ERROR,
++                   "Cannot allocate VVC header of size %d.\n",
++                   avctx->extradata_size);
++            vvenc_encoder_close(s->vvencEnc);
++            return AVERROR(ENOMEM);
++        }
++
++        memcpy(avctx->extradata, s->pAU->payload, avctx->extradata_size);
++        memset(avctx->extradata + avctx->extradata_size, 0,
++               AV_INPUT_BUFFER_PADDING_SIZE);
++    }
++    s->encodeDone = false;
++    return 0;
++}
++
++static av_cold int ff_vvenc_encode_close(AVCodecContext * avctx)
++{
++    VVenCContext *s = (VVenCContext *) avctx->priv_data;
++    if (s->vvencEnc) {
++        if (av_log_get_level() >= AV_LOG_VERBOSE)
++            vvenc_print_summary(s->vvencEnc);
++
++        if (0 != vvenc_encoder_close(s->vvencEnc)) {
++            av_log(avctx, AV_LOG_ERROR, "cannot close vvenc\n");
++            return -1;
++        }
++    }
++
++    vvenc_accessUnit_free(s->pAU, true);
++
++    return 0;
++}
++
++static av_cold int ff_vvenc_encode_frame(AVCodecContext *avctx, AVPacket *pkt,
++                                         const AVFrame *frame, int *got_packet)
++{
++    VVenCContext *s = (VVenCContext *) avctx->priv_data;
++    vvencYUVBuffer *pyuvbuf;
++    vvencYUVBuffer yuvbuf;
++    int pict_type;
++    int ret;
++
++    pyuvbuf = NULL;
++    if (frame) {
++        if (avctx->pix_fmt == AV_PIX_FMT_YUV420P10LE) {
++            vvenc_YUVBuffer_default(&yuvbuf);
++            yuvbuf.planes[0].ptr = (int16_t *) frame->data[0];
++            yuvbuf.planes[1].ptr = (int16_t *) frame->data[1];
++            yuvbuf.planes[2].ptr = (int16_t *) frame->data[2];
++
++            yuvbuf.planes[0].width = frame->width;
++            yuvbuf.planes[0].height = frame->height;
++            yuvbuf.planes[0].stride = frame->linesize[0] >> 1;  // stride is used in samples (16bit) in vvenc, ffmpeg uses stride in bytes
++
++            yuvbuf.planes[1].width = frame->width >> 1;
++            yuvbuf.planes[1].height = frame->height >> 1;
++            yuvbuf.planes[1].stride = frame->linesize[1] >> 1;
++
++            yuvbuf.planes[2].width = frame->width >> 1;
++            yuvbuf.planes[2].height = frame->height >> 1;
++            yuvbuf.planes[2].stride = frame->linesize[2] >> 1;
++
++            yuvbuf.cts = frame->pts;
++            yuvbuf.ctsValid = true;
++            pyuvbuf = &yuvbuf;
++        } else {
++            av_log(avctx, AV_LOG_ERROR,
++                   "unsupported input colorspace! input must be yuv420p10le");
++            return AVERROR(EINVAL);
++        }
++    }
++
++    if (!s->encodeDone) {
++        ret = vvenc_encode(s->vvencEnc, pyuvbuf, s->pAU, &s->encodeDone);
++        if (ret != 0) {
++            av_log(avctx, AV_LOG_ERROR, "error in vvenc::encode - ret:%d\n",
++                   ret);
++            return AVERROR(EINVAL);
++        }
++    } else {
++        *got_packet = 0;
++        return 0;
++    }
++
++    if (s->pAU->payloadUsedSize > 0) {
++        ret = ff_get_encode_buffer(avctx, pkt, s->pAU->payloadUsedSize, 0);
++        if (ret < 0) {
++            av_log(avctx, AV_LOG_ERROR, "Error getting output packet.\n");
++            return ret;
++        }
++
++        memcpy(pkt->data, s->pAU->payload, s->pAU->payloadUsedSize);
++
++        if (s->pAU->ctsValid)
++            pkt->pts = s->pAU->cts;
++        if (s->pAU->dtsValid)
++            pkt->dts = s->pAU->dts;
++        pkt->flags |= AV_PKT_FLAG_KEY * s->pAU->rap;
++
++        switch (s->pAU->sliceType) {
++        case VVENC_I_SLICE:
++            pict_type = AV_PICTURE_TYPE_I;
++            break;
++        case VVENC_P_SLICE:
++            pict_type = AV_PICTURE_TYPE_P;
++            break;
++        case VVENC_B_SLICE:
++            pict_type = AV_PICTURE_TYPE_B;
++            break;
++        default:
++            av_log(avctx, AV_LOG_ERROR, "Unknown picture type encountered.\n");
++            return AVERROR_EXTERNAL;
++        }
++
++        ff_side_data_set_encoder_stats(pkt, 0, NULL, 0, pict_type);
++
++        *got_packet = 1;
++
++        return 0;
++    } else {
++        *got_packet = 0;
++        return 0;
++    }
++
++    return 0;
++}
++
++static const enum AVPixelFormat pix_fmts_vvenc[] = {
++    AV_PIX_FMT_YUV420P10LE,
++    AV_PIX_FMT_NONE
++};
++
++#define OFFSET(x) offsetof(VVenCContext, x)
++#define VE AV_OPT_FLAG_VIDEO_PARAM | AV_OPT_FLAG_ENCODING_PARAM
++static const AVOption libvvenc_options[] = {
++    {"preset", "set encoding preset(0: faster - 4: slower", OFFSET( options.preset), AV_OPT_TYPE_INT, {.i64 = 2} , 0 , 4 , VE, "preset"},
++        { "faster", "0", 0, AV_OPT_TYPE_CONST, {.i64 = VVENC_FASTER}, INT_MIN, INT_MAX, VE, "preset" },
++        { "fast",   "1", 0, AV_OPT_TYPE_CONST, {.i64 = VVENC_FAST},   INT_MIN, INT_MAX, VE, "preset" },
++        { "medium", "2", 0, AV_OPT_TYPE_CONST, {.i64 = VVENC_MEDIUM}, INT_MIN, INT_MAX, VE, "preset" },
++        { "slow",   "3", 0, AV_OPT_TYPE_CONST, {.i64 = VVENC_SLOW},   INT_MIN, INT_MAX, VE, "preset" },
++        { "slower", "4", 0, AV_OPT_TYPE_CONST, {.i64 = VVENC_SLOWER}, INT_MIN, INT_MAX, VE, "preset" },
++    { "qp"     , "set quantization", OFFSET(options.qp), AV_OPT_TYPE_INT,  {.i64 = -1}, -1 , 63 ,VE, "qp_mode" },
++    { "period" , "set (intra) refresh period in seconds", OFFSET(options.intraRefreshSec), AV_OPT_TYPE_INT,  {.i64 = 1},  1 , INT_MAX ,VE,"irefreshsec" },
++    { "subjopt", "set subjective (perceptually motivated) optimization", OFFSET(options.subjectiveOptimization), AV_OPT_TYPE_BOOL, {.i64 = 1},  0 , 1, VE},
++    { "bitdepth8", "set 8bit coding mode", OFFSET(options.flag8bitCoding), AV_OPT_TYPE_BOOL, {.i64 = 0},  0 , 1, VE},
++    { "vvenc-params", "set the vvenc configuration using a :-separated list of key=value parameters", OFFSET(options.vvenc_opts), AV_OPT_TYPE_DICT, { 0 }, 0, 0, VE },
++    { "levelidc", "vvc level_idc", OFFSET( options.levelIdc), AV_OPT_TYPE_INT, {.i64 = 0}, 0, 105, VE, "levelidc"},
++        { "0",   "auto", 0, AV_OPT_TYPE_CONST, {.i64 = 0},  INT_MIN, INT_MAX, VE, "levelidc"},
++        { "1",   "1"   , 0, AV_OPT_TYPE_CONST, {.i64 = 16}, INT_MIN, INT_MAX, VE, "levelidc"},
++        { "2",   "2"   , 0, AV_OPT_TYPE_CONST, {.i64 = 32}, INT_MIN, INT_MAX, VE, "levelidc"},
++        { "2.1", "2.1" , 0, AV_OPT_TYPE_CONST, {.i64 = 35}, INT_MIN, INT_MAX, VE, "levelidc"},
++        { "3",   "3"   , 0, AV_OPT_TYPE_CONST, {.i64 = 48}, INT_MIN, INT_MAX, VE, "levelidc"},
++        { "3.1", "3.1" , 0, AV_OPT_TYPE_CONST, {.i64 = 51}, INT_MIN, INT_MAX, VE, "levelidc"},
++        { "4",   "4"   , 0, AV_OPT_TYPE_CONST, {.i64 = 64}, INT_MIN, INT_MAX, VE, "levelidc"},
++        { "4.1", "4.1" , 0, AV_OPT_TYPE_CONST, {.i64 = 67}, INT_MIN, INT_MAX, VE, "levelidc"},
++        { "5",   "5"   , 0, AV_OPT_TYPE_CONST, {.i64 = 80}, INT_MIN, INT_MAX, VE, "levelidc"},
++        { "5.1", "5.1" , 0, AV_OPT_TYPE_CONST, {.i64 = 83}, INT_MIN, INT_MAX, VE, "levelidc"},
++        { "5.2", "5.2" , 0, AV_OPT_TYPE_CONST, {.i64 = 86}, INT_MIN, INT_MAX, VE, "levelidc"},
++        { "6",   "6"   , 0, AV_OPT_TYPE_CONST, {.i64 = 96}, INT_MIN, INT_MAX, VE, "levelidc"},
++        { "6.1", "6.1" , 0, AV_OPT_TYPE_CONST, {.i64 = 99}, INT_MIN, INT_MAX, VE, "levelidc"},
++        { "6.2", "6.2" , 0, AV_OPT_TYPE_CONST, {.i64 = 102}, INT_MIN, INT_MAX, VE, "levelidc"},
++        { "6.3", "6.3" , 0, AV_OPT_TYPE_CONST, {.i64 = 105}, INT_MIN, INT_MAX, VE, "levelidc"},
++    { "tier", "set vvc tier", OFFSET( options.tier), AV_OPT_TYPE_INT, {.i64 = 0},  0 , 1 , VE, "tier"},
++        { "main", "main", 0, AV_OPT_TYPE_CONST, {.i64 = 0}, INT_MIN, INT_MAX, VE, "tier"},
++        { "high", "high", 0, AV_OPT_TYPE_CONST, {.i64 = 1}, INT_MIN, INT_MAX, VE, "tier"},
++    {NULL}
++};
++
++static const AVClass class_libvvenc = {
++    .class_name = "libvvenc-vvc encoder",
++    .item_name  = av_default_item_name,
++    .option     = libvvenc_options,
++    .version    = LIBAVUTIL_VERSION_INT,
++};
++
++FFCodec ff_libvvenc_encoder = {
++    .p.name         = "libvvenc",
++    CODEC_LONG_NAME("H.266 / VVC Encoder VVenC"),
++    .p.type         = AVMEDIA_TYPE_VIDEO,
++    .p.id           = AV_CODEC_ID_VVC,
++    .p.capabilities = AV_CODEC_CAP_DELAY | AV_CODEC_CAP_OTHER_THREADS,
++    .p.profiles     = NULL_IF_CONFIG_SMALL(ff_vvc_profiles),
++    .p.priv_class   = &class_libvvenc,
++    .p.wrapper_name = "libvvenc",
++    .priv_data_size = sizeof(VVenCContext),
++    .p.pix_fmts     = pix_fmts_vvenc,
++    .init           = ff_vvenc_encode_init,
++    FF_CODEC_ENCODE_CB(ff_vvenc_encode_frame),
++    .close          = ff_vvenc_encode_close,
++    .caps_internal  = FF_CODEC_CAP_AUTO_THREADS,
++};
+
+From patchwork Mon May  6 17:03:19 2024
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+X-Patchwork-Submitter: Christian Bartnik <chris10317h5@gmail.com>
+X-Patchwork-Id: 48592
+Delivered-To: ffmpegpatchwork2@gmail.com
+Received: by 2002:a05:6a20:e68f:b0:1af:836d:81b3 with SMTP id
+ mz15csp1504529pzb;
+        Mon, 6 May 2024 10:05:04 -0700 (PDT)
+X-Forwarded-Encrypted: i=2;
+ AJvYcCW/ILh7lLVZa7D6UOrTf+DTfY9oDXOeDanjg7PdkiP4KlP/YB05kCdUQB4HW0ts8t+7dolidkaK5xIZ/PYRpVB3byrISBpbR4MTVA==
+X-Google-Smtp-Source: 
+ AGHT+IE3but8gAeR3F5kb5j50o5TDKuJVvog2yDY4YnLLf1r8WBj8ksaW+qaJyvWtka5ahI4G1ZQ
+X-Received: by 2002:a50:aa95:0:b0:572:67ee:d3d9 with SMTP id
+ q21-20020a50aa95000000b0057267eed3d9mr6705318edc.17.1715015104154;
+        Mon, 06 May 2024 10:05:04 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1715015104; cv=none;
+        d=google.com; s=arc-20160816;
+        b=dQBJDsqlP1PINRw5IXnQSUDNRqg6Rf8oENtbptWRo0TsfUFx5AiPUuK/kWDkpioPWW
+         qE2bFbnmJ3b+lDUyaxcVzs4fiSPPsAurmLNN73M3BkLNxlE72AggivCyOJL0F5XLkNzL
+         wBjztL4/5qTpd2zaUHqQcDGty6YANBNDWnZ94jnb0IX9jEbDYQ73yKLxujrhCdOtwn1h
+         S5bQdJxOeOhLiUOCV86IcUzRLu2SGSEp4OPQxzYDcY4Nm7bO/GZAzUHDzgk7OWGA6BkY
+         t7AD4FhZG/2/thd60qqEjDSvuyQtpNVlxXyvkN/Yd2gExn1FGE5bin90/3buPzgYBtX8
+         D4JQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com;
+ s=arc-20160816;
+        h=sender:errors-to:content-transfer-encoding:reply-to:list-subscribe
+         :list-help:list-post:list-archive:list-unsubscribe:list-id
+         :precedence:subject:mime-version:references:in-reply-to:message-id
+         :date:to:from:dkim-signature:delivered-to;
+        bh=j/Owv7XShCzGyKbYHRjnvv9xH0rxO7om6RwerXYXxxQ=;
+        fh=YOA8vD9MJZuwZ71F/05pj6KdCjf6jQRmzLS+CATXUQk=;
+        b=QC50USLsG8StVfxiqF6+ocrVJBPfCyt9YlXmI1FCP6Y8BmBRidJ/Gq0exBKCqineL7
+         VvK4ub5zn88InjiTas2bsb4A6jWmQeWpJoF/qlaz9Kp0FxQPcumvqAj0zuCfrxQYB0du
+         5ya4HiuoUpd25zPw0C8/rq3XjQgt/aDbNnytzVOUxRP1RzTk2P4ntl4QQwgnQTTZwJqV
+         EeFYKgZQ5C309Pf2IkuHSgnkmiYm6PVkhA1itsTpcgH20gEBPYb786syaWDUrL9vYeWY
+         5VcOje/colZaYZiUi6f8z3EHjBe2NfNnQfMR01wL6LjKtGlFhiDBKaBYEb/9JW/XT9jW
+         ibWg==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=neutral (body hash did not verify) header.i=@gmail.com
+ header.s=20230601 header.b=FBlQ5Oak;
+       spf=pass (google.com: domain of ffmpeg-devel-bounces@ffmpeg.org
+ designates 79.124.17.100 as permitted sender)
+ smtp.mailfrom=ffmpeg-devel-bounces@ffmpeg.org;
+       dmarc=fail (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com
+Return-Path: <ffmpeg-devel-bounces@ffmpeg.org>
+Received: from ffbox0-bg.mplayerhq.hu (ffbox0-bg.ffmpeg.org. [79.124.17.100])
+        by mx.google.com with ESMTP id
+ j16-20020a50ed10000000b0056e5bf5b980si4921145eds.538.2024.05.06.10.05.03;
+        Mon, 06 May 2024 10:05:04 -0700 (PDT)
+Received-SPF: pass (google.com: domain of ffmpeg-devel-bounces@ffmpeg.org
+ designates 79.124.17.100 as permitted sender) client-ip=79.124.17.100;
+Authentication-Results: mx.google.com;
+       dkim=neutral (body hash did not verify) header.i=@gmail.com
+ header.s=20230601 header.b=FBlQ5Oak;
+       spf=pass (google.com: domain of ffmpeg-devel-bounces@ffmpeg.org
+ designates 79.124.17.100 as permitted sender)
+ smtp.mailfrom=ffmpeg-devel-bounces@ffmpeg.org;
+       dmarc=fail (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com
+Received: from [127.0.1.1] (localhost [127.0.0.1])
+	by ffbox0-bg.mplayerhq.hu (Postfix) with ESMTP id 2542C68D5EC;
+	Mon,  6 May 2024 20:05:00 +0300 (EEST)
+X-Original-To: ffmpeg-devel@ffmpeg.org
+Delivered-To: ffmpeg-devel@ffmpeg.org
+Received: from mail-pg1-f195.google.com (unknown [209.85.215.195])
+ by ffbox0-bg.mplayerhq.hu (Postfix) with ESMTPS id 0FAFD68D67E
+ for <ffmpeg-devel@ffmpeg.org>; Mon,  6 May 2024 20:04:43 +0300 (EEST)
+Received: by mail-pg1-f195.google.com with SMTP id
+ 41be03b00d2f7-5d42e7ab8a9so1194224a12.3
+ for <ffmpeg-devel@ffmpeg.org>; Mon, 06 May 2024 10:04:42 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=gmail.com; s=20230601; t=1715015034; x=1715619834; darn=ffmpeg.org;
+ h=content-transfer-encoding:mime-version:references:in-reply-to
+ :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
+ :reply-to; bh=/pcmuC/+vH0MQpBKD32Pp3xAMipRIGWCiQc4+k+gC7s=;
+ b=FBlQ5OakXW9bp4Giimpn1aNn4T02PsrqaPEX/OF+ZkfDBBHEf5xHrYq9tUVYtQaPKx
+ 9iMEopiK+zXzaDahtEv2Ua4O70AWgaHMfpvH5Q2KXX4e3ycbQVf6LkJAGZkdI1chqXk+
+ unU/3q6+AUn8j17Tqlx4qWgrsmRhxRn53Rl7iwCCZF8RBCrNcJm07Cum6kiLfimjsiND
+ 4ETTb2E/dGu7KuR7csy0dIITPe1jt3/1vWyvviE8e1Tj7GC17ltEFBdHviz2DIaRM2L0
+ jwuRpZ22wG8wFraPBh/ONPZjqeqakVeUM3UFkK5bCEYzjxXBNt3lZl/x7BQWNJ6toTFd
+ JTOg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20230601; t=1715015034; x=1715619834;
+ h=content-transfer-encoding:mime-version:references:in-reply-to
+ :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
+ :subject:date:message-id:reply-to;
+ bh=/pcmuC/+vH0MQpBKD32Pp3xAMipRIGWCiQc4+k+gC7s=;
+ b=lQZcT5wQjQkTHECfpvC1G5icTYo4wQtkd3wqcuc3WBBZDR3EXDwg9kUfcznyV9FtNE
+ fUX/+d0AK+eWF/Z83cLRI/gyOebwhpAOm7rte8arbyb/zJ1sKtxA6QyiyRsdF6isSVUv
+ /OI426ijvaYtpgq872ns/eQ2JT87C0SHWC620rPylFgiDtRM/NQquy8G3lF/hLv6zkZa
+ +uIryNC0mDFCD2R05uV94+ocdkfBIDvkKzgTSBTrkya9mFFwBQ1Yay0ykGZrtkwdeIiw
+ bLHbbtMX2tmfRHadmSBNVf4shKYxAQHxeraHwQ5lNNW9GTwaECjipJ4sDJ10VQatDauZ
+ HTag==
+X-Gm-Message-State: AOJu0YyzulgOZ7jibcNtd7v96Q4tK0bu78+X+e8cMqAVLl0yxk5CYUpj
+ w0b0+0VcBkXC5BTPDWui/PxoTNDQHlbq3IIoi7NlXQsUVxt+rMbdr2useMAu
+X-Received: by 2002:a17:90b:1086:b0:2b0:5836:5837 with SMTP id
+ gj6-20020a17090b108600b002b058365837mr8439625pjb.40.1715015033575;
+ Mon, 06 May 2024 10:03:53 -0700 (PDT)
+Received: from localhost.localdomain
+ ([2804:d55:9507:1500:9008:575f:9f19:a5ca])
+ by smtp.gmail.com with ESMTPSA id
+ w3-20020a17090a528300b002b4329ec537sm6755527pjh.53.2024.05.06.10.03.50
+ for <ffmpeg-devel@ffmpeg.org>
+ (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+ Mon, 06 May 2024 10:03:52 -0700 (PDT)
+From: Christian Bartnik <chris10317h5@gmail.com>
+To: ffmpeg-devel@ffmpeg.org
+Date: Mon,  6 May 2024 19:03:19 +0200
+Message-Id: <20240506170319.43685-3-chris10317h5@gmail.com>
+X-Mailer: git-send-email 2.39.3 (Apple Git-146)
+In-Reply-To: <20240506170319.43685-1-chris10317h5@gmail.com>
+References: <20240506170319.43685-1-chris10317h5@gmail.com>
+MIME-Version: 1.0
+X-Unsent: 1
+Subject: [FFmpeg-devel] [PATCH v2 2/2] avcodec: add external dec libvvdec
+ for H266/VVC
+X-BeenThere: ffmpeg-devel@ffmpeg.org
+X-Mailman-Version: 2.1.29
+Precedence: list
+List-Id: FFmpeg development discussions and patches <ffmpeg-devel.ffmpeg.org>
+List-Unsubscribe: <https://ffmpeg.org/mailman/options/ffmpeg-devel>,
+ <mailto:ffmpeg-devel-request@ffmpeg.org?subject=unsubscribe>
+List-Archive: <https://ffmpeg.org/pipermail/ffmpeg-devel>
+List-Post: <mailto:ffmpeg-devel@ffmpeg.org>
+List-Help: <mailto:ffmpeg-devel-request@ffmpeg.org?subject=help>
+List-Subscribe: <https://ffmpeg.org/mailman/listinfo/ffmpeg-devel>,
+ <mailto:ffmpeg-devel-request@ffmpeg.org?subject=subscribe>
+Reply-To: FFmpeg development discussions and patches <ffmpeg-devel@ffmpeg.org>
+Errors-To: ffmpeg-devel-bounces@ffmpeg.org
+Sender: "ffmpeg-devel" <ffmpeg-devel-bounces@ffmpeg.org>
+X-TUID: 5zln0uP5Ujks
+
+From: Thomas Siedel <thomas.ff@spin-digital.com>
+
+Add external decoder VVdeC for H266/VVC decoding.
+Register new decoder libvvdec.
+Add vvc_parse_extradata to support parse/probe of vvcC stream input.
+Add vvc_paramset that implements the parser of vvcC configuration boxes.
+Add libvvdec to wrap the vvdec interface.
+Enable decoder by adding --enable-libvvdec in configure step.
+
+Co-authored-by: Christian Bartnik chris10317h5@gmail.com
+Signed-off-by: Christian Bartnik <chris10317h5@gmail.com>
+---
+ configure              |   5 +
+ libavcodec/Makefile    |   1 +
+ libavcodec/allcodecs.c |   1 +
+ libavcodec/libvvdec.c  | 617 +++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 624 insertions(+)
+ create mode 100644 libavcodec/libvvdec.c
+
+--
+2.34.1
+
+diff --git a/configure b/configure
+index cb312d9c73..a7a9da3276 100755
+--- a/configure
++++ b/configure
+@@ -294,6 +294,7 @@ External library support:
+                            native implementation exists [no]
+   --enable-libvpx          enable VP8 and VP9 de/encoding via libvpx [no]
+   --enable-libvvenc        enable H.266/VVC encoding via vvenc [no]
++  --enable-libvvdec        enable H.266/VVC decoding via vvdec [no]
+   --enable-libwebp         enable WebP encoding via libwebp [no]
+   --enable-libx264         enable H.264 encoding via x264 [no]
+   --enable-libx265         enable HEVC encoding via x265 [no]
+@@ -1968,6 +1969,7 @@ EXTERNAL_LIBRARY_LIST="
+     libvorbis
+     libvpx
+     libvvenc
++    libvvdec
+     libwebp
+     libxevd
+     libxeve
+@@ -3551,6 +3553,8 @@ libvpx_vp8_encoder_deps="libvpx"
+ libvpx_vp9_decoder_deps="libvpx"
+ libvpx_vp9_encoder_deps="libvpx"
+ libvvenc_encoder_deps="libvvenc"
++libvvdec_decoder_deps="libvvdec"
++libvvdec_decoder_select="vvc_mp4toannexb_bsf"
+ libwebp_encoder_deps="libwebp"
+ libwebp_anim_encoder_deps="libwebp"
+ libx262_encoder_deps="libx262"
+@@ -7014,6 +7018,7 @@ enabled libvpx            && {
+     fi
+ }
+ enabled libvvenc          && require_pkg_config libvvenc "libvvenc >= 1.6.1" "vvenc/vvenc.h" vvenc_get_version
++enabled libvvdec          && require_pkg_config libvvdec "libvvdec >= 1.6.0" "vvdec/vvdec.h" vvdec_get_version
+
+ enabled libwebp           && {
+     enabled libwebp_encoder      && require_pkg_config libwebp "libwebp >= 0.2.0" webp/encode.h WebPGetEncoderVersion
+diff --git a/libavcodec/Makefile b/libavcodec/Makefile
+index 54d85f6aaa..851b62179d 100644
+--- a/libavcodec/Makefile
++++ b/libavcodec/Makefile
+@@ -1156,6 +1156,7 @@ OBJS-$(CONFIG_LIBVPX_VP8_ENCODER)         += libvpxenc.o
+ OBJS-$(CONFIG_LIBVPX_VP9_DECODER)         += libvpxdec.o
+ OBJS-$(CONFIG_LIBVPX_VP9_ENCODER)         += libvpxenc.o
+ OBJS-$(CONFIG_LIBVVENC_ENCODER)           += libvvenc.o
++OBJS-$(CONFIG_LIBVVDEC_DECODER)           += libvvdec.o
+ OBJS-$(CONFIG_LIBWEBP_ENCODER)            += libwebpenc_common.o libwebpenc.o
+ OBJS-$(CONFIG_LIBWEBP_ANIM_ENCODER)       += libwebpenc_common.o libwebpenc_animencoder.o
+ OBJS-$(CONFIG_LIBX262_ENCODER)            += libx264.o
+diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
+index bb2c3ce017..9e0ad00b23 100644
+--- a/libavcodec/allcodecs.c
++++ b/libavcodec/allcodecs.c
+@@ -802,6 +802,7 @@ extern const FFCodec ff_libvpx_vp8_decoder;
+ extern FFCodec ff_libvpx_vp9_encoder;
+ extern const FFCodec ff_libvpx_vp9_decoder;
+ extern const FFCodec ff_libvvenc_encoder;
++extern const FFCodec ff_libvvdec_decoder;
+ /* preferred over libwebp */
+ extern const FFCodec ff_libwebp_anim_encoder;
+ extern const FFCodec ff_libwebp_encoder;
+diff --git a/libavcodec/libvvdec.c b/libavcodec/libvvdec.c
+new file mode 100644
+index 0000000000..7f94a81b37
+--- /dev/null
++++ b/libavcodec/libvvdec.c
+@@ -0,0 +1,617 @@
++/*
++ * H.266 decoding using the VVdeC library
++ *
++ * Copyright (C) 2022, Thomas Siedel
++ *
++ * This file is part of FFmpeg.
++ *
++ * FFmpeg is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * FFmpeg is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with FFmpeg; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
++ */
++
++#include "config_components.h"
++
++#include <vvdec/vvdec.h>
++
++#include "libavutil/common.h"
++#include "libavutil/avutil.h"
++#include "libavutil/pixdesc.h"
++#include "libavutil/opt.h"
++#include "libavutil/imgutils.h"
++#include "libavutil/frame.h"
++#include "libavutil/mastering_display_metadata.h"
++#include "libavutil/log.h"
++
++#include "avcodec.h"
++#include "codec_internal.h"
++#include "decode.h"
++#include "internal.h"
++#include "profiles.h"
++
++#include "cbs_h266.h"
++
++typedef struct VVdeCContext {
++    AVClass      *av_class;
++    vvdecDecoder *vvdecDec;
++    vvdecParams  vvdecParams;
++    bool         bFlush;
++    AVBufferPool *pools[3];     /** Pools for each data plane. */
++    int          pool_size[3];
++    CodedBitstreamContext *cbc;
++    CodedBitstreamFragment current_frame;
++} VVdeCContext;
++
++
++static void ff_vvdec_log_callback(void *avctx, int level, const char *fmt,
++                                  va_list args)
++{
++    vfprintf(level == 1 ? stderr : stdout, fmt, args);
++}
++
++static void *ff_vvdec_buffer_allocator(void *ctx, vvdecComponentType comp,
++                                       uint32_t size, uint32_t alignment,
++                                       void **allocator)
++{
++    AVBufferRef *buf;
++    VVdeCContext *s;
++    int plane;
++
++    uint32_t alignedsize = FFALIGN(size, alignment);
++    s = (VVdeCContext *) ctx;
++    plane = (int) comp;
++
++    if (plane < 0 || plane > 3)
++        return NULL;
++
++    if (alignedsize != s->pool_size[plane]) {
++        av_buffer_pool_uninit(&s->pools[plane]);
++        s->pools[plane] = av_buffer_pool_init(alignedsize, NULL);
++        if (!s->pools[plane]) {
++            s->pool_size[plane] = 0;
++            return NULL;
++        }
++        s->pool_size[plane] = alignedsize;
++    }
++
++    buf = av_buffer_pool_get(s->pools[plane]);
++    if (!buf)
++        return NULL;
++
++    *allocator = (void *) buf;
++    return buf->data;
++}
++
++static void ff_vvdec_buffer_unref(void *ctx, void *allocator)
++{
++    AVBufferRef *buf = (AVBufferRef *) allocator;
++    av_buffer_unref(&buf);
++}
++
++static void ff_vvdec_printParameterInfo(AVCodecContext *avctx,
++                                        vvdecParams *params)
++{
++    av_log(avctx, AV_LOG_DEBUG, "Version info: vvdec %s ( threads %d)\n",
++           vvdec_get_version(), params->threads);
++}
++
++static int ff_vvdec_set_pix_fmt(AVCodecContext *avctx, vvdecFrame *frame)
++{
++    if (NULL != frame->picAttributes && NULL != frame->picAttributes->vui &&
++        frame->picAttributes->vui->colourDescriptionPresentFlag) {
++        avctx->color_trc       = frame->picAttributes->vui->transferCharacteristics;
++        avctx->color_primaries = frame->picAttributes->vui->colourPrimaries;
++        avctx->colorspace      = frame->picAttributes->vui->matrixCoefficients;
++    } else {
++        avctx->color_primaries = AVCOL_PRI_UNSPECIFIED;
++        avctx->color_trc       = AVCOL_TRC_UNSPECIFIED;
++        avctx->colorspace      = AVCOL_SPC_UNSPECIFIED;
++    }
++
++    if (NULL != frame->picAttributes && NULL != frame->picAttributes->vui &&
++        frame->picAttributes->vui->videoSignalTypePresentFlag) {
++        avctx->color_range = frame->picAttributes->vui->videoFullRangeFlag ?
++                             AVCOL_RANGE_JPEG : AVCOL_RANGE_MPEG;
++    } else {
++        avctx->color_range = AVCOL_RANGE_MPEG;
++    }
++
++    switch (frame->colorFormat) {
++    case VVDEC_CF_YUV420_PLANAR:
++    case VVDEC_CF_YUV400_PLANAR:
++        if (frame->bitDepth == 8) {
++            avctx->pix_fmt = frame->numPlanes == 1 ?
++                             AV_PIX_FMT_GRAY8 : AV_PIX_FMT_YUV420P;
++            avctx->profile = FF_PROFILE_VVC_MAIN_10;
++            return 0;
++        } else if (frame->bitDepth == 10) {
++            avctx->pix_fmt = frame->numPlanes == 1 ?
++                AV_PIX_FMT_GRAY10 : AV_PIX_FMT_YUV420P10;
++            avctx->profile = FF_PROFILE_VVC_MAIN_10;
++            return 0;
++        } else {
++            return AVERROR_INVALIDDATA;
++        }
++    case VVDEC_CF_YUV422_PLANAR:
++    case VVDEC_CF_YUV444_PLANAR:
++        if (frame->bitDepth == 8) {
++            avctx->pix_fmt = frame->colorFormat == VVDEC_CF_YUV444_PLANAR ?
++                             AV_PIX_FMT_YUV444P : AV_PIX_FMT_YUV422P;
++            if (avctx->profile != FF_PROFILE_VVC_MAIN_10_444)
++                avctx->profile = FF_PROFILE_VVC_MAIN_10_444;
++            return 0;
++        } else if (frame->bitDepth == 10) {
++            avctx->pix_fmt = frame->colorFormat == VVDEC_CF_YUV444_PLANAR ?
++                             AV_PIX_FMT_YUV444P10 : AV_PIX_FMT_YUV422P10;
++            if (avctx->profile != FF_PROFILE_VVC_MAIN_10_444)
++                avctx->profile = FF_PROFILE_VVC_MAIN_10_444;
++            return 0;
++        } else {
++            return AVERROR_INVALIDDATA;
++        }
++    default:
++        return AVERROR_INVALIDDATA;
++    }
++}
++
++static int set_side_data(AVCodecContext *avctx, AVFrame *avframe,
++                         vvdecFrame *frame)
++{
++    vvdecSEI *sei;
++    VVdeCContext *s = (VVdeCContext *) avctx->priv_data;
++
++    sei = vvdec_find_frame_sei(s->vvdecDec,
++                               VVDEC_MASTERING_DISPLAY_COLOUR_VOLUME, frame);
++    if (sei) {
++        // VVC uses a g,b,r ordering, which we convert to a more natural r,g,b
++        const int mapping[3] = { 2, 0, 1 };
++        const int chroma_den = 50000;
++        const int luma_den = 10000;
++        int i;
++        vvdecSEIMasteringDisplayColourVolume *p;
++        AVMasteringDisplayMetadata *metadata =
++            av_mastering_display_metadata_create_side_data(avframe);
++        p = (vvdecSEIMasteringDisplayColourVolume *) (sei->payload);
++        if (p && metadata) {
++            for (i = 0; i < 3; i++) {
++                const int j = mapping[i];
++                metadata->display_primaries[i][0].num = p->primaries[j][0];
++                metadata->display_primaries[i][0].den = chroma_den;
++                metadata->display_primaries[i][1].num = p->primaries[j][1];
++                metadata->display_primaries[i][1].den = chroma_den;
++            }
++            metadata->white_point[0].num = p->whitePoint[0];
++            metadata->white_point[0].den = chroma_den;
++            metadata->white_point[1].num = p->whitePoint[1];
++            metadata->white_point[1].den = chroma_den;
++
++            metadata->max_luminance.num = p->maxLuminance;
++            metadata->max_luminance.den = luma_den;
++            metadata->min_luminance.num = p->minLuminance;
++            metadata->min_luminance.den = luma_den;
++            metadata->has_luminance = 1;
++            metadata->has_primaries = 1;
++
++            av_log(avctx, AV_LOG_DEBUG, "Mastering Display Metadata:\n");
++            av_log(avctx, AV_LOG_DEBUG,
++                   "r(%5.4f,%5.4f) g(%5.4f,%5.4f) b(%5.4f %5.4f) wp(%5.4f, %5.4f)\n",
++                   av_q2d(metadata->display_primaries[0][0]),
++                   av_q2d(metadata->display_primaries[0][1]),
++                   av_q2d(metadata->display_primaries[1][0]),
++                   av_q2d(metadata->display_primaries[1][1]),
++                   av_q2d(metadata->display_primaries[2][0]),
++                   av_q2d(metadata->display_primaries[2][1]),
++                   av_q2d(metadata->white_point[0]),
++                   av_q2d(metadata->white_point[1]));
++            av_log(avctx, AV_LOG_DEBUG, "min_luminance=%f, max_luminance=%f\n",
++                   av_q2d(metadata->min_luminance),
++                   av_q2d(metadata->max_luminance));
++        }
++        return 0;
++    }
++
++    sei = vvdec_find_frame_sei(s->vvdecDec, VVDEC_CONTENT_LIGHT_LEVEL_INFO,
++                               frame);
++    if (sei) {
++        vvdecSEIContentLightLevelInfo *p = NULL;
++        AVContentLightMetadata *light =
++            av_content_light_metadata_create_side_data(avframe);
++        p = (vvdecSEIContentLightLevelInfo *) (sei->payload);
++        if (p && light) {
++            light->MaxCLL  = p->maxContentLightLevel;
++            light->MaxFALL = p->maxPicAverageLightLevel;
++        }
++
++        av_log(avctx, AV_LOG_DEBUG, "Content Light Level Metadata:\n");
++        av_log(avctx, AV_LOG_DEBUG, "MaxCLL=%d, MaxFALL=%d\n",
++               light->MaxCLL, light->MaxFALL);
++    }
++
++    return 0;
++}
++
++static int set_pixel_format(AVCodecContext *avctx, const H266RawSPS *sps)
++{
++    enum AVPixelFormat pix_fmt = AV_PIX_FMT_NONE;
++    const AVPixFmtDescriptor *desc;
++    switch (sps->sps_bitdepth_minus8+8) {
++    case 8:
++        if (sps->sps_chroma_format_idc == 0)
++            pix_fmt = AV_PIX_FMT_GRAY8;
++        if (sps->sps_chroma_format_idc == 1)
++            pix_fmt = AV_PIX_FMT_YUV420P;
++        if (sps->sps_chroma_format_idc == 2)
++            pix_fmt = AV_PIX_FMT_YUV422P;
++        if (sps->sps_chroma_format_idc == 3)
++            pix_fmt = AV_PIX_FMT_YUV444P;
++        break;
++    case 9:
++        if (sps->sps_chroma_format_idc == 0)
++            pix_fmt = AV_PIX_FMT_GRAY9;
++        if (sps->sps_chroma_format_idc == 1)
++            pix_fmt = AV_PIX_FMT_YUV420P9;
++        if (sps->sps_chroma_format_idc == 2)
++            pix_fmt = AV_PIX_FMT_YUV422P9;
++        if (sps->sps_chroma_format_idc == 3)
++            pix_fmt = AV_PIX_FMT_YUV444P9;
++        break;
++    case 10:
++        if (sps->sps_chroma_format_idc == 0)
++            pix_fmt = AV_PIX_FMT_GRAY10;
++        if (sps->sps_chroma_format_idc == 1)
++            pix_fmt = AV_PIX_FMT_YUV420P10;
++        if (sps->sps_chroma_format_idc == 2)
++            pix_fmt = AV_PIX_FMT_YUV422P10;
++        if (sps->sps_chroma_format_idc == 3)
++            pix_fmt = AV_PIX_FMT_YUV444P10;
++        break;
++    case 12:
++        if (sps->sps_chroma_format_idc == 0)
++            pix_fmt = AV_PIX_FMT_GRAY12;
++        if (sps->sps_chroma_format_idc == 1)
++            pix_fmt = AV_PIX_FMT_YUV420P12;
++        if (sps->sps_chroma_format_idc == 2)
++            pix_fmt = AV_PIX_FMT_YUV422P12;
++        if (sps->sps_chroma_format_idc == 3)
++            pix_fmt = AV_PIX_FMT_YUV444P12;
++        break;
++    default:
++        av_log(avctx, AV_LOG_ERROR,
++               "The following bit-depths are currently specified: 8, 9, 10 and 12 bits, "
++               "sps_chroma_format_idc is %d, depth is %d\n",
++               sps->sps_chroma_format_idc, sps->sps_bitdepth_minus8+8);
++        return AVERROR_INVALIDDATA;
++    }
++
++    desc = av_pix_fmt_desc_get(pix_fmt);
++    if (!desc)
++        return AVERROR(EINVAL);
++
++    avctx->pix_fmt = pix_fmt;
++
++    return 0;
++}
++
++static void export_stream_params(AVCodecContext *avctx, const H266RawSPS *sps)
++{
++    avctx->coded_width  = sps->sps_pic_width_max_in_luma_samples;
++    avctx->coded_height = sps->sps_pic_height_max_in_luma_samples;
++    avctx->width        = sps->sps_pic_width_max_in_luma_samples -
++                          sps->sps_conf_win_left_offset -
++                          sps->sps_conf_win_right_offset;
++    avctx->height       = sps->sps_pic_height_max_in_luma_samples -
++                          sps->sps_conf_win_top_offset -
++                          sps->sps_conf_win_bottom_offset;
++    avctx->has_b_frames = sps->sps_max_sublayers_minus1+1;
++    avctx->profile      = sps->profile_tier_level.general_profile_idc;
++    avctx->level        = sps->profile_tier_level.general_level_idc;
++
++    set_pixel_format( avctx, sps);
++
++    avctx->color_range = sps->vui.vui_full_range_flag ? AVCOL_RANGE_JPEG :
++                                                        AVCOL_RANGE_MPEG;
++
++    if (sps->vui.vui_colour_description_present_flag) {
++        avctx->color_primaries = sps->vui.vui_colour_primaries;
++        avctx->color_trc       = sps->vui.vui_transfer_characteristics;
++        avctx->colorspace      = sps->vui.vui_matrix_coeffs;
++    } else {
++        avctx->color_primaries = AVCOL_PRI_UNSPECIFIED;
++        avctx->color_trc       = AVCOL_TRC_UNSPECIFIED;
++        avctx->colorspace      = AVCOL_SPC_UNSPECIFIED;
++    }
++
++    avctx->chroma_sample_location = AVCHROMA_LOC_UNSPECIFIED;
++    if (sps->sps_chroma_format_idc == 1) {
++        if (sps->vui.vui_chroma_loc_info_present_flag) {
++            if (sps->vui.vui_chroma_sample_loc_type_top_field <= 5)
++                avctx->chroma_sample_location =
++                    sps->vui.vui_chroma_sample_loc_type_top_field + 1;
++        } else
++            avctx->chroma_sample_location = AVCHROMA_LOC_LEFT;
++    }
++
++    if (sps->sps_timing_hrd_params_present_flag &&
++        sps->sps_general_timing_hrd_parameters.num_units_in_tick &&
++        sps->sps_general_timing_hrd_parameters.time_scale) {
++        av_reduce(&avctx->framerate.den, &avctx->framerate.num,
++                  sps->sps_general_timing_hrd_parameters.num_units_in_tick,
++                  sps->sps_general_timing_hrd_parameters.time_scale, INT_MAX);
++    }
++}
++
++static av_cold int ff_vvdec_decode_init(AVCodecContext *avctx)
++{
++    int i, ret;
++    VVdeCContext *s = (VVdeCContext *) avctx->priv_data;
++
++    vvdec_params_default(&s->vvdecParams);
++    s->vvdecParams.logLevel = VVDEC_DETAILS;
++
++    if (av_log_get_level() >= AV_LOG_DEBUG)
++        s->vvdecParams.logLevel = VVDEC_DETAILS;
++    else if (av_log_get_level() >= AV_LOG_VERBOSE)
++        s->vvdecParams.logLevel = VVDEC_INFO;     // VVDEC_INFO will output per picture info
++    else if (av_log_get_level() >= AV_LOG_INFO)
++        s->vvdecParams.logLevel = VVDEC_WARNING;  // AV_LOG_INFO is ffmpeg default
++    else
++        s->vvdecParams.logLevel = VVDEC_SILENT;
++
++    if (avctx->thread_count > 0)
++        s->vvdecParams.threads = avctx->thread_count;   // number of worker threads (should not exceed the number of physical cpu's)
++    else
++        s->vvdecParams.threads = -1;    // get max cpus
++
++    ff_vvdec_printParameterInfo(avctx, &s->vvdecParams);
++
++    // using buffer allocation by using AVBufferPool
++    s->vvdecParams.opaque = avctx->priv_data;
++    s->vvdecDec = vvdec_decoder_open_with_allocator(&s->vvdecParams,
++                                                    ff_vvdec_buffer_allocator,
++                                                    ff_vvdec_buffer_unref);
++
++
++    if (!s->vvdecDec) {
++        av_log(avctx, AV_LOG_ERROR, "cannot init vvdec decoder\n");
++        return -1;
++    }
++
++    vvdec_set_logging_callback(s->vvdecDec, ff_vvdec_log_callback);
++
++    s->bFlush = false;
++
++    for (i = 0; i < FF_ARRAY_ELEMS(s->pools); i++) {
++        s->pools[i] = NULL;
++        s->pool_size[i] = 0;
++    }
++
++    ret = ff_cbs_init(&s->cbc, AV_CODEC_ID_VVC, avctx);
++    if (ret)
++        return ret;
++
++    if (!avctx->internal->is_copy) {
++        if (avctx->extradata_size > 0 && avctx->extradata) {
++            const CodedBitstreamH266Context *h266 = s->cbc->priv_data;
++            ff_cbs_fragment_reset(&s->current_frame);
++            ret = ff_cbs_read_extradata_from_codec(s->cbc, &s->current_frame, avctx);
++            if (ret < 0)
++                return ret;
++
++            if ( h266->sps[0] != NULL)
++              export_stream_params(avctx, h266->sps[0]);
++        }
++    }
++
++    return 0;
++}
++
++static av_cold int ff_vvdec_decode_close(AVCodecContext *avctx)
++{
++    VVdeCContext *s = (VVdeCContext *) avctx->priv_data;
++
++    for (int i = 0; i < FF_ARRAY_ELEMS(s->pools); i++) {
++        av_buffer_pool_uninit(&s->pools[i]);
++        s->pool_size[i] = 0;
++    }
++
++    if (0 != vvdec_decoder_close(s->vvdecDec)) {
++        av_log(avctx, AV_LOG_ERROR, "cannot close vvdec\n");
++        return -1;
++    }
++
++    ff_cbs_fragment_free(&s->current_frame);
++    ff_cbs_close(&s->cbc);
++
++    s->bFlush = false;
++    return 0;
++}
++
++static av_cold int ff_vvdec_decode_frame(AVCodecContext *avctx, AVFrame *data,
++                                         int *got_frame, AVPacket *avpkt)
++{
++    VVdeCContext *s = avctx->priv_data;
++    AVFrame *avframe = data;
++
++    int ret = 0;
++    vvdecFrame *frame = NULL;
++
++    if (avframe) {
++        if (!avpkt->size && !s->bFlush)
++            s->bFlush = true;
++
++        if (s->bFlush)
++            ret = vvdec_flush(s->vvdecDec, &frame);
++        else {
++            vvdecAccessUnit accessUnit;
++            vvdec_accessUnit_default(&accessUnit);
++            accessUnit.payload = avpkt->data;
++            accessUnit.payloadSize = avpkt->size;
++            accessUnit.payloadUsedSize = avpkt->size;
++
++            accessUnit.cts = avpkt->pts;
++            accessUnit.ctsValid = true;
++            accessUnit.dts = avpkt->dts;
++            accessUnit.dtsValid = true;
++
++            ret = vvdec_decode(s->vvdecDec, &accessUnit, &frame);
++        }
++
++        if (ret < 0) {
++            if (ret == VVDEC_EOF)
++                s->bFlush = true;
++            else if (ret != VVDEC_TRY_AGAIN) {
++                av_log(avctx, AV_LOG_ERROR,
++                       "error in vvdec::decode - ret:%d - %s %s\n", ret,
++                       vvdec_get_last_error(s->vvdecDec), vvdec_get_last_additional_error( s->vvdecDec));
++                ret=AVERROR_EXTERNAL;
++                goto fail;
++            }
++        } else if (NULL != frame) {
++            const uint8_t *src_data[4] = { frame->planes[0].ptr,
++                                           frame->planes[1].ptr,
++                                           frame->planes[2].ptr, NULL };
++            const int src_linesizes[4] = { (int) frame->planes[0].stride,
++                                           (int) frame->planes[1].stride,
++                                           (int) frame->planes[2].stride, 0 };
++
++            if ((ret = ff_vvdec_set_pix_fmt(avctx, frame)) < 0) {
++                av_log(avctx, AV_LOG_ERROR,
++                       "Unsupported output colorspace (%d) / bit_depth (%d)\n",
++                       frame->colorFormat, frame->bitDepth);
++                goto fail;
++            }
++
++            if ((int) frame->width != avctx->width ||
++                (int) frame->height != avctx->height) {
++                av_log(avctx, AV_LOG_INFO, "dimension change! %dx%d -> %dx%d\n",
++                       avctx->width, avctx->height, frame->width, frame->height);
++
++                ret = ff_set_dimensions(avctx, frame->width, frame->height);
++                if (ret < 0)
++                    goto fail;
++            }
++
++            if (frame->planes[0].allocator)
++                avframe->buf[0] =
++                    av_buffer_ref((AVBufferRef *) frame->planes[0].allocator);
++            if (frame->planes[1].allocator)
++                avframe->buf[1] =
++                    av_buffer_ref((AVBufferRef *) frame->planes[1].allocator);
++            if (frame->planes[2].allocator)
++                avframe->buf[2] =
++                    av_buffer_ref((AVBufferRef *) frame->planes[2].allocator);
++
++            for (int i = 0; i < 4; i++) {
++                avframe->data[i] = (uint8_t *) src_data[i];
++                avframe->linesize[i] = src_linesizes[i];
++            }
++
++            ret = ff_decode_frame_props(avctx, avframe);
++            if (ret < 0)
++                goto fail;
++
++            if (frame->picAttributes) {
++                if (frame->picAttributes->isRefPic)
++                    avframe->flags |= AV_FRAME_FLAG_KEY;
++                else
++                    avframe->flags &= ~AV_FRAME_FLAG_KEY;
++
++                avframe->pict_type = (frame->picAttributes->sliceType !=
++                    VVDEC_SLICETYPE_UNKNOWN) ?
++                    frame->picAttributes->sliceType + 1 : AV_PICTURE_TYPE_NONE;
++            }
++
++            if (frame->ctsValid)
++                avframe->pts = frame->cts;
++
++            ret = set_side_data(avctx, avframe, frame);
++            if (ret < 0)
++                goto fail;
++
++            if (0 != vvdec_frame_unref(s->vvdecDec, frame))
++                av_log(avctx, AV_LOG_ERROR, "cannot free picture memory\n");
++
++            *got_frame = 1;
++        }
++    }
++
++    return avpkt->size;
++
++  fail:
++    if (frame) {
++        if (frame->planes[0].allocator)
++            av_buffer_unref((AVBufferRef **) &frame->planes[0].allocator);
++        if (frame->planes[1].allocator)
++            av_buffer_unref((AVBufferRef **) &frame->planes[1].allocator);
++        if (frame->planes[2].allocator)
++            av_buffer_unref((AVBufferRef **) &frame->planes[2].allocator);
++
++        vvdec_frame_unref(s->vvdecDec, frame);
++    }
++    return ret;
++}
++
++static av_cold void ff_vvdec_decode_flush(AVCodecContext *avctx)
++{
++    VVdeCContext *s = (VVdeCContext *) avctx->priv_data;
++
++    if (0 != vvdec_decoder_close(s->vvdecDec))
++        av_log(avctx, AV_LOG_ERROR, "cannot close vvdec during flush\n");
++
++    s->vvdecDec = vvdec_decoder_open_with_allocator(&s->vvdecParams,
++                                                    ff_vvdec_buffer_allocator,
++                                                    ff_vvdec_buffer_unref);
++    if (!s->vvdecDec)
++        av_log(avctx, AV_LOG_ERROR, "cannot reinit vvdec during flush\n");
++
++    vvdec_set_logging_callback(s->vvdecDec, ff_vvdec_log_callback);
++
++    s->bFlush = false;
++}
++
++static const enum AVPixelFormat pix_fmts_vvdec[] = {
++    AV_PIX_FMT_GRAY8,
++    AV_PIX_FMT_GRAY10,
++    AV_PIX_FMT_YUV420P,
++    AV_PIX_FMT_YUV422P,
++    AV_PIX_FMT_YUV444P,
++    AV_PIX_FMT_YUV420P10LE,
++    AV_PIX_FMT_YUV422P10LE,
++    AV_PIX_FMT_YUV444P10LE,
++    AV_PIX_FMT_NONE
++};
++
++static const AVClass class_libvvdec = {
++    .class_name = "libvvdec-vvc decoder",
++    .item_name  = av_default_item_name,
++    .version    = LIBAVUTIL_VERSION_INT,
++};
++
++FFCodec ff_libvvdec_decoder = {
++    .p.name         = "libvvdec",
++    CODEC_LONG_NAME("H.266 / VVC Decoder VVdeC"),
++    .p.type         = AVMEDIA_TYPE_VIDEO,
++    .p.id           = AV_CODEC_ID_VVC,
++    .p.capabilities = AV_CODEC_CAP_DELAY | AV_CODEC_CAP_OTHER_THREADS,
++    .p.profiles     = NULL_IF_CONFIG_SMALL(ff_vvc_profiles),
++    .p.priv_class   = &class_libvvdec,
++    .p.wrapper_name = "libvvdec",
++    .priv_data_size = sizeof(VVdeCContext),
++    .p.pix_fmts     = pix_fmts_vvdec,
++    .init           = ff_vvdec_decode_init,
++    FF_CODEC_DECODE_CB(ff_vvdec_decode_frame),
++    .close          = ff_vvdec_decode_close,
++    .flush          = ff_vvdec_decode_flush,
++    .bsfs           = "vvc_mp4toannexb",
++    .caps_internal  = FF_CODEC_CAP_AUTO_THREADS,
++};
