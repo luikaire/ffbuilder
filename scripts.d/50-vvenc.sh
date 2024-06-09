@@ -10,10 +10,6 @@ fixarm64=()
 
 ffbuild_dockerbuild() {
 
-    for patch in /patches/*.patch; do
-        echo "Applying $patch"
-        git am < "$patch"
-    done
     mkdir build && cd build
 
     
