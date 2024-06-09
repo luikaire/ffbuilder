@@ -10,7 +10,6 @@ fixarm64=()
 
 ffbuild_dockerbuild() {
 
-    wget -O Add-support-for-H266-VVC.patch https://patchwork.ffmpeg.org/series/11673/mbox/ && git apply Add-support-for-H266-VVC.patch
    # for patch in /patches/*.patch; do
    #     echo "Applying $patch"
    #     git am < "$patch"
