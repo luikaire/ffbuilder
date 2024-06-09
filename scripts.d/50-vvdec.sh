@@ -10,10 +10,11 @@ fixarm64=()
 
 ffbuild_dockerbuild() {
 
-    for patch in /patches/*.patch; do
-        echo "Applying $patch"
-        git am < "$patch"
-    done
+    wget -O Add-support-for-H266-VVC.patch https://patchwork.ffmpeg.org/series/11673/mbox/ && git apply Add-support-for-H266-VVC.patch
+   # for patch in /patches/*.patch; do
+   #     echo "Applying $patch"
+   #     git am < "$patch"
+   # done
     mkdir build && cd build
 
     if [[ $TARGET == *arm64 ]]; then
